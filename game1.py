@@ -1,6 +1,7 @@
 import os
 import pygame
 import sys
+import random
 FPS = 50
 size = WIDTH, HEIGHT = 1000, 500
 screen = pygame.display.set_mode(size)
@@ -74,6 +75,8 @@ def load_level(filename):
 
 tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'), 'stairs': load_image('box.png')}
 player_image = load_image('mar.png')
+bullet_image = load_image('bullet.png')
+mobe_images = {'1': load_image('1.png'), '2': load_image('2.png'), '3': load_image('3.png')}
 
 tile_width = tile_height = 50
 
@@ -111,11 +114,51 @@ class Player(pygame.sprite.Sprite):
             if x < level_x and level[y][x + 1] != '*':
                 self.move(x + 1, y)
 
+    def shoot(self):
+        bullet = Bullet(self.rect.x, self.rect.top)
+        all_sprites.add(bullet)
+        bullets.add(bullet)
+
+
+class Mob(pygame.sprite.Sprite):
+    def __init__(self, mob_type, pos_x, pos_y):
+        super().__init__(mobs, all_sprites)
+        self.image = mobe_images[mob_type]
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.pos = pos_x, pos_y
+
+    def move(self, x, y):
+        self.pos = (x, y)
+        self.rect = self.image.get_rect().move(
+            tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 5)
+
+    def update(self):
+        x, y = self.pos
+        if level[y][x + 1] == '.' or level[y][x - 1] == '.':
+            self.rect.x = random.choice(tile_width * (self.pos[0] - 1) + 15, tile_width * (self.pos[0] + 1) + 15)
+
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = bullet_image
+        self.rect = self.image.get_rect()
+        self.rect.y_pos = y
+        self.rect.x_pos = x
+        self.speedy = -10
+
+    def update(self):
+        self.rect.x += self.speedy
+        if self.rect.x_pos < 0 or self.rect.x_pos > 1000:
+            self.kill()
+
 
 player = None
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
+mobs = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -131,6 +174,12 @@ def generate_level(level):
             elif level[y][x] == '@':
                 Tile('empty', x, y)
                 new_player = Player(x, y)
+            elif level[y][x] == '/':
+                Mob('1', x, y)
+            elif level[y][x] == '+':
+                Mob('2', x, y)
+            elif level[y][x] == '-':
+                Mob('3', x, y)
     return new_player, x, y
 
 
@@ -143,15 +192,23 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         key = pygame.key.get_pressed()
-        if key[pygame.K_DOWN]:
+        if key[pygame.K_DOWN] or key[pygame.K_s]:
             player.moves('down')
-        if key[pygame.K_UP]:
+        if key[pygame.K_UP] or key[pygame.K_w]:
             player.moves('up')
-        if key[pygame.K_LEFT]:
+        if key[pygame.K_LEFT] or key[pygame.K_a]:
             player.moves('left')
-        if key[pygame.K_RIGHT]:
+        if key[pygame.K_RIGHT] or key[pygame.K_d]:
             player.moves('right')
+        if key[pygame.K_b]:
+            player.shoot()
+    all_sprites.update()
+    hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
+    hits = pygame.sprite.spritecollide(player, mobs, False)
+    if hits:
+        running = False
     tiles_group.draw(screen)
     player_group.draw(screen)
+    mobs.draw(screen)
     pygame.display.flip()
 pygame.quit()
