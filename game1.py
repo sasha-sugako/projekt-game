@@ -4,10 +4,10 @@ import sys
 import random
 FPS = 50
 size = WIDTH, HEIGHT = 1000, 500
+tile_width = tile_height = 50
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 pygame.init()
-
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -73,12 +73,10 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'), 'stairs': load_image('box.png')}
-player_image = load_image('mar.png')
+tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'), 'stairs': load_image('stair.png')}
+player_image = load_image('pers.png')
 bullet_image = load_image('bullet.png')
 mobe_images = {'1': load_image('1.png'), '2': load_image('2.png'), '3': load_image('3.png')}
-
-tile_width = tile_height = 50
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
@@ -91,21 +89,21 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(player_group, all_sprites)
         self.image = player_image
-        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
         self.pos = pos_x, pos_y
 
     def move(self, x, y):
         self.pos = (x, y)
         self.rect = self.image.get_rect().move(
-            tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 5)
+            tile_width * self.pos[0], tile_height * self.pos[1])
 
     def moves(self, stor):
         x, y = self.pos
         if stor == 'up':
-            if y > 0 and level[y][x] == '#':
+            if y > 0 and level[y][x] == '#' and level[y - 1][x] != '*':
                 self.move(x, y - 1)
         if stor == 'down':
-            if y < level_y and level[y][x] == '#':
+            if y < level_y and level[y][x] == '#' and level[y + 1][x] != '*':
                 self.move(x, y + 1)
         if stor == 'left':
             if x > 0 and level[y][x - 1] != '*':
@@ -113,11 +111,6 @@ class Player(pygame.sprite.Sprite):
         if stor == 'right':
             if x < level_x and level[y][x + 1] != '*':
                 self.move(x + 1, y)
-
-    def shoot(self):
-        bullet = Bullet(self.rect.x, self.rect.top)
-        all_sprites.add(bullet)
-        bullets.add(bullet)
 
 
 class Mob(pygame.sprite.Sprite):
@@ -138,19 +131,17 @@ class Mob(pygame.sprite.Sprite):
             self.rect.x = random.choice(tile_width * (self.pos[0] - 1) + 15, tile_width * (self.pos[0] + 1) + 15)
 
 
-class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = bullet_image
-        self.rect = self.image.get_rect()
-        self.rect.y_pos = y
-        self.rect.x_pos = x
-        self.speedy = -10
+class Bullet():
+    def __init__(self, x, y, r, col,  facing):
+        self.y = y
+        self.x = x
+        self.r = r
+        self.col = col
+        self.facing = facing
+        self.speedy = 8 * facing
 
-    def update(self):
-        self.rect.x += self.speedy
-        if self.rect.x_pos < 0 or self.rect.x_pos > 1000:
-            self.kill()
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.col, (self.x, self.y), self.r)
 
 
 player = None
@@ -158,7 +149,6 @@ all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
-bullets = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -186,8 +176,11 @@ def generate_level(level):
 level = load_level('1.txt')
 player, level_x, level_y = generate_level(level)
 start_screen()
+sna = []
+lastmove = 'right'
 running = True
 while running:
+    pygame.time.delay(100)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -198,15 +191,26 @@ while running:
             player.moves('up')
         if key[pygame.K_LEFT] or key[pygame.K_a]:
             player.moves('left')
+            lastmove = 'left'
         if key[pygame.K_RIGHT] or key[pygame.K_d]:
             player.moves('right')
+            lastmove = 'right'
         if key[pygame.K_b]:
-            player.shoot()
+            if lastmove == 'right':
+                facing = 1
+            else:
+                facing = -1
+            if len(sna) < 5:
+                sna.append(Bullet(player.pos[0] * tile_width + 20, player.pos[1] * tile_width + 15,
+                                  8, (255, 0, 0), facing))
+    for i in sna:
+        if i.x < 1000 and i.x > 0:
+            i.x += i.speedy
+            print(i.x)
+            i.draw(screen)
+        else:
+            sna.pop(sna.index(i))
     all_sprites.update()
-    hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
-    hits = pygame.sprite.spritecollide(player, mobs, False)
-    if hits:
-        running = False
     tiles_group.draw(screen)
     player_group.draw(screen)
     mobs.draw(screen)
