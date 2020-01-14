@@ -73,10 +73,9 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'), 'stairs': load_image('stair.png')}
+tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'), 'stairs': load_image('box.png')}
 player_image = load_image('pers.png')
-bullet_image = load_image('bullet.png')
-mobe_images = {'1': load_image('1.png'), '2': load_image('2.png'), '3': load_image('3.png')}
+mobe_image = load_image('1.png')
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
@@ -114,9 +113,9 @@ class Player(pygame.sprite.Sprite):
 
 
 class Mob(pygame.sprite.Sprite):
-    def __init__(self, mob_type, pos_x, pos_y):
+    def __init__(self, pos_x, pos_y):
         super().__init__(mobs, all_sprites)
-        self.image = mobe_images[mob_type]
+        self.image = mobe_image
         self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
         self.pos = pos_x, pos_y
 
@@ -165,11 +164,8 @@ def generate_level(level):
                 Tile('empty', x, y)
                 new_player = Player(x, y)
             elif level[y][x] == '/':
-                Mob('1', x, y)
-            elif level[y][x] == '+':
-                Mob('2', x, y)
-            elif level[y][x] == '-':
-                Mob('3', x, y)
+                Mob(x, y)
+                Tile('empty', x, y)
     return new_player, x, y
 
 
