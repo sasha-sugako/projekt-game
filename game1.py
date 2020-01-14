@@ -76,6 +76,7 @@ def load_level(filename):
 tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'), 'stairs': load_image('box.png')}
 player_image = load_image('pers.png')
 mobe_image = load_image('1.png')
+bullet = load_image('box.png')
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
@@ -130,23 +131,27 @@ class Mob(pygame.sprite.Sprite):
             self.rect.x = random.choice(tile_width * (self.pos[0] - 1) + 15, tile_width * (self.pos[0] + 1) + 15)
 
 
-class Bullet():
-    def __init__(self, x, y, r, col,  facing):
-        self.y = y
-        self.x = x
-        self.r = r
-        self.col = col
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y, facing):
+        super().__init__(bullets)
+        self.image = bullet
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.pos = pos_x, pos_y
         self.facing = facing
         self.speedy = 8 * facing
 
-    def draw(self, screen):
-        pygame.draw.circle(screen, self.col, (self.x, self.y), self.r)
+    def moves(self, x, y):
+        self.pos = (x, y)
+        if level[y][x + 1] == '.' or level[y][x + 1] == '#':
+            self.rect = self.image.get_rect().move(
+                tile_width * self.pos[0], tile_height * self.pos[1])
 
 
 player = None
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 
 
@@ -172,8 +177,8 @@ def generate_level(level):
 level = load_level('1.txt')
 player, level_x, level_y = generate_level(level)
 start_screen()
-sna = []
 lastmove = 'right'
+kol_bul = False
 running = True
 while running:
     pygame.time.delay(100)
@@ -192,23 +197,13 @@ while running:
             player.moves('right')
             lastmove = 'right'
         if key[pygame.K_b]:
-            if lastmove == 'right':
-                facing = 1
-            else:
-                facing = -1
-            if len(sna) < 5:
-                sna.append(Bullet(player.pos[0] * tile_width + 20, player.pos[1] * tile_width + 15,
-                                  8, (255, 0, 0), facing))
-    for i in sna:
-        if i.x < 1000 and i.x > 0:
-            i.x += i.speedy
-            print(i.x)
-            i.draw(screen)
-        else:
-            sna.pop(sna.index(i))
+            kol_bul = True
+            bul = Bullet(player.pos[0], player.pos[1], 1)
+            bul.moves(player.pos[0] + 1, player.pos[1])
     all_sprites.update()
     tiles_group.draw(screen)
     player_group.draw(screen)
     mobs.draw(screen)
+    bullets.draw(screen)
     pygame.display.flip()
 pygame.quit()
