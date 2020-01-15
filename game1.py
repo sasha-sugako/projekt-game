@@ -138,13 +138,10 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
         self.pos = pos_x, pos_y
         self.facing = facing
-        self.speedy = 8 * facing
 
     def moves(self, x, y):
         self.pos = (x, y)
-        if level[y][x + 1] == '.' or level[y][x + 1] == '#':
-            self.rect = self.image.get_rect().move(
-                tile_width * self.pos[0], tile_height * self.pos[1])
+        self.rect = self.image.get_rect().move(tile_width * self.pos[0], tile_height * self.pos[1])
 
 
 player = None
@@ -178,7 +175,8 @@ level = load_level('1.txt')
 player, level_x, level_y = generate_level(level)
 start_screen()
 lastmove = 'right'
-kol_bul = False
+bul = []
+x_b = []
 running = True
 while running:
     pygame.time.delay(100)
@@ -197,9 +195,23 @@ while running:
             player.moves('right')
             lastmove = 'right'
         if key[pygame.K_b]:
-            kol_bul = True
-            bul = Bullet(player.pos[0], player.pos[1], 1)
-            bul.moves(player.pos[0] + 1, player.pos[1])
+            if lastmove == 'right':
+                face = 1
+            else:
+                face = -1
+            if len(bul) < 3:
+                bul.append(Bullet(player.pos[0], player.pos[1], face))
+                y = player.pos[1]
+                x_b.append(player.pos[0])
+    for i in range(len(bul)):
+        if level[y][x_b[i] + bul[i].facing] == '.' or level[y][x_b[i] + bul[i].facing] == '#' \
+                or level[y][x_b[i] + bul[i].facing] == '@':
+            x_b[i] += 1 * bul[i].facing
+        else:
+            bul[i].kill()
+            del bul[i]
+            del x_b[i]
+        bul[i].moves(x_b[i], player.pos[1])
     all_sprites.update()
     tiles_group.draw(screen)
     player_group.draw(screen)
