@@ -161,6 +161,7 @@ class Player(pygame.sprite.Sprite):
             self.image = player_image_dv_vv[self.coun]
             self.coun += 1
 
+
 class Mob(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(mobs, all_sprites)
@@ -168,6 +169,7 @@ class Mob(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y - 5)
         self.pos = pos_x, pos_y
         self.k = 0
+        self.f = 0
 
     def move(self, x, y):
         self.pos = (x, y)
@@ -177,13 +179,16 @@ class Mob(pygame.sprite.Sprite):
     def update(self):
         if player.pos[1] == self.pos[1]:
             if player.pos[0] - self.pos[0] < 0:
-                self.move(self.pos[0] - 1, self.pos[1])
+                if self.f % 10 == 5:
+                    self.move(self.pos[0] - 1, self.pos[1])
             else:
-                self.move(self.pos[0] + 1, self.pos[1])
+                if self.f % 10 == 5:
+                    self.move(self.pos[0] + 1, self.pos[1])
+            self.f += 1
         else:
-            if self.k % 3 == 0 or self.k % 3 == 0:
+            if (self.k % 20 == 0 or self.k % 20 == 15) and level[self.pos[1]][self.pos[0] - 1] != '*':
                 self.move(self.pos[0] - 1, self.pos[1])
-            if self.k % 3 == 1 or self.k % 3 == 2:
+            if (self.k % 20 == 5 or self.k % 20 == 10) and level[self.pos[1]][self.pos[0] + 1] != '*':
                 self.move(self.pos[0] + 1, self.pos[1])
             self.k += 1
 
