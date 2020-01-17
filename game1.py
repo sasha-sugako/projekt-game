@@ -175,20 +175,17 @@ class Mob(pygame.sprite.Sprite):
             tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 5)
 
     def update(self):
-        if player.pos[1] != self.pos[1]:
-            if self.k == 0 or self.k == 3:
-                self.move(self.pos[0] - 1, self.pos[1])
-                self.k = 0
-            if self.k == 1 or self.k == 2:
-                self.move(self.pos[0] + 1, self.pos[1])
-            self.k += 1
-            print(self.k)
-        else:
+        if player.pos[1] == self.pos[1]:
             if player.pos[0] - self.pos[0] < 0:
                 self.move(self.pos[0] - 1, self.pos[1])
             else:
                 self.move(self.pos[0] + 1, self.pos[1])
-
+        else:
+            if self.k % 3 == 0 or self.k % 3 == 0:
+                self.move(self.pos[0] - 1, self.pos[1])
+            if self.k % 3 == 1 or self.k % 3 == 2:
+                self.move(self.pos[0] + 1, self.pos[1])
+            self.k += 1
 
 
 class Bullet(pygame.sprite.Sprite):
