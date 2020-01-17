@@ -32,10 +32,12 @@ def terminate():
 
 
 def start_screen():
-    intro_text = ["ЗАСТАВКА", "",
+    intro_text = ["", "",
                   "Правила игры",
-                  "Если в правилах несколько строк,",
-                  "приходится выводить их построчно"]
+                  "Для ходьбы в разные стороны используйте стрелки вправо и влево или кнопки a, d",
+                  "Для залезания по лестницам используйте стрелки вверх и вниз или кнопки w, s",
+                  "Для стрельбы используйте кнопку b",
+                  'Чтобы поставить игру на паузу используйте кнопку esc']
 
     fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
@@ -165,19 +167,28 @@ class Mob(pygame.sprite.Sprite):
         self.image = mobe_image
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y - 5)
         self.pos = pos_x, pos_y
+        self.k = 0
 
     def move(self, x, y):
         self.pos = (x, y)
         self.rect = self.image.get_rect().move(
             tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 5)
 
-    def dead(self):
-        self.image = load_image('12.png')
+    def update(self):
+        if player.pos[1] != self.pos[1]:
+            if self.k == 0 or self.k == 3:
+                self.move(self.pos[0] - 1, self.pos[1])
+                self.k = 0
+            if self.k == 1 or self.k == 2:
+                self.move(self.pos[0] + 1, self.pos[1])
+            self.k += 1
+            print(self.k)
+        else:
+            if player.pos[0] - self.pos[0] < 0:
+                self.move(self.pos[0] - 1, self.pos[1])
+            else:
+                self.move(self.pos[0] + 1, self.pos[1])
 
-    #def update(self):
-        #x, y = self.pos
-        #if level[y][x + 1] == '.' or level[y][x - 1] == '.':
-            #self.rect.x = random.choice(tile_width * (self.pos[0] - 1) + 15, tile_width * (self.pos[0] + 1) + 15)
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -250,7 +261,7 @@ while running:
                 face = 1
             else:
                 face = -1
-            if len(bul) < 2:
+            if len(bul) == 0:
                 bul.append(Bullet(player.pos[0], player.pos[1], face))
                 y = player.pos[1]
                 x_b.append(player.pos[0])
@@ -263,6 +274,7 @@ while running:
             del x_b[i]
         if i < len(bul):
             bul[i].moves(x_b[i], player.pos[1])
+    mobs.update()
     all_sprites.update()
     tiles_group.draw(screen)
     player_group.draw(screen)
