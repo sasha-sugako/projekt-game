@@ -73,8 +73,11 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-tile_images = {'wall': load_image('box.png'), 'empty': load_image('grass.png'), 'stairs': load_image('box.png')}
+tile_images = {'wall': load_image('wall.png'), 'empty': load_image('grass.png'), 'stairs': load_image('box.png')}
 player_image = load_image('pers.png')
+player_image_dv_p = [load_image('pers.png'), load_image('run2.png'), load_image('run1.png')]
+player_image_dv_l = [load_image('pers.png'),  load_image('run3.png'), load_image('run4.png')]
+player_image_dv_vv = [load_image('climb1.png'), load_image('climb2.png'), load_image('pers.png')]
 mobe_image = load_image('1.png')
 bullet = load_image('box.png')
 
@@ -91,6 +94,7 @@ class Player(pygame.sprite.Sprite):
         self.image = player_image
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
         self.pos = pos_x, pos_y
+        self.coun = 0
 
     def move(self, x, y):
         self.pos = (x, y)
@@ -101,23 +105,39 @@ class Player(pygame.sprite.Sprite):
         x, y = self.pos
         if stor == 'up':
             if y > 0 and level[y][x] == '#' and level[y - 1][x] != '*':
+                self.draw_animation(3)
                 self.move(x, y - 1)
         if stor == 'down':
             if y < level_y and level[y][x] == '#' and level[y + 1][x] != '*':
+                self.draw_animation(3)
                 self.move(x, y + 1)
         if stor == 'left':
             if x > 0 and level[y][x - 1] != '*':
+                self.draw_animation(2)
                 self.move(x - 1, y)
         if stor == 'right':
             if x < level_x and level[y][x + 1] != '*':
+                self.draw_animation(1)
                 self.move(x + 1, y)
 
+    def draw_animation(self, posi):
+        if self.coun == 3:
+            self.coun = 0
+        if posi == 1:
+            self.image = player_image_dv_p[self.coun]
+            self.coun += 1
+        if posi == 2:
+            self.image = player_image_dv_l[self.coun]
+            self.coun += 1
+        if posi == 3:
+            self.image = player_image_dv_vv[self.coun]
+            self.coun += 1
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(mobs, all_sprites)
         self.image = mobe_image
-        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y - 5)
         self.pos = pos_x, pos_y
 
     def move(self, x, y):
@@ -125,10 +145,13 @@ class Mob(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(
             tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 5)
 
-    def update(self):
-        x, y = self.pos
-        if level[y][x + 1] == '.' or level[y][x - 1] == '.':
-            self.rect.x = random.choice(tile_width * (self.pos[0] - 1) + 15, tile_width * (self.pos[0] + 1) + 15)
+    def dead(self):
+        self.image = load_image('12.png')
+
+    #def update(self):
+        #x, y = self.pos
+        #if level[y][x + 1] == '.' or level[y][x - 1] == '.':
+            #self.rect.x = random.choice(tile_width * (self.pos[0] - 1) + 15, tile_width * (self.pos[0] + 1) + 15)
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -199,19 +222,19 @@ while running:
                 face = 1
             else:
                 face = -1
-            if len(bul) < 3:
+            if len(bul) < 2:
                 bul.append(Bullet(player.pos[0], player.pos[1], face))
                 y = player.pos[1]
                 x_b.append(player.pos[0])
     for i in range(len(bul)):
-        if level[y][x_b[i] + bul[i].facing] == '.' or level[y][x_b[i] + bul[i].facing] == '#' \
-                or level[y][x_b[i] + bul[i].facing] == '@':
+        if level[y][x_b[i] + bul[i].facing] == '.' or level[y][x_b[i] + bul[i].facing] == '#':
             x_b[i] += 1 * bul[i].facing
         else:
             bul[i].kill()
             del bul[i]
             del x_b[i]
-        bul[i].moves(x_b[i], player.pos[1])
+        if i < len(bul):
+            bul[i].moves(x_b[i], player.pos[1])
     all_sprites.update()
     tiles_group.draw(screen)
     player_group.draw(screen)
