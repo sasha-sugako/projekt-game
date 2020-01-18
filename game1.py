@@ -107,7 +107,8 @@ player_image_dv_p = [load_image('pers.png'), load_image('run2.png'), load_image(
 player_image_dv_l = [load_image('pers.png'),  load_image('run3.png'), load_image('run4.png')]
 player_image_dv_vv = [load_image('climb1.png'), load_image('climb2.png'), load_image('pers.png')]
 mobe_image = load_image('1.png')
-bullet = load_image('box.png')
+bullet = load_image('bullet.png')
+dead_mob = load_image('12.png')
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
@@ -168,42 +169,48 @@ class Mob(pygame.sprite.Sprite):
         self.image = mobe_image
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y - 5)
         self.pos = pos_x, pos_y
+        self.mob_update = True
         self.k = 0
         self.f = 0
 
     def move(self, x, y):
         self.pos = (x, y)
         self.rect = self.image.get_rect().move(
-            tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 5)
+            tile_width * self.pos[0] + 10, tile_height * self.pos[1] - 5)
+
+    def dead(self):
+        self.image = dead_mob
+        self.mob_update = False
 
     def update(self):
-        if player.pos[1] == self.pos[1]:
-            if player.pos[0] - self.pos[0] < 0:
-                if self.f % 10 == 5:
-                    self.move(self.pos[0] - 1, self.pos[1])
+        if self.mob_update:
+            if player.pos[1] == self.pos[1]:
+                if player.pos[0] - self.pos[0] < 0:
+                    if self.f % 10 == 5:
+                        self.move(self.pos[0] - 1, self.pos[1])
+                else:
+                    if self.f % 10 == 5:
+                        self.move(self.pos[0] + 1, self.pos[1])
+                self.f += 1
             else:
-                if self.f % 10 == 5:
+                if (self.k % 20 == 0 or self.k % 20 == 15) and level[self.pos[1]][self.pos[0] - 1] != '*':
+                    self.move(self.pos[0] - 1, self.pos[1])
+                if (self.k % 20 == 5 or self.k % 20 == 10) and level[self.pos[1]][self.pos[0] + 1] != '*':
                     self.move(self.pos[0] + 1, self.pos[1])
-            self.f += 1
-        else:
-            if (self.k % 20 == 0 or self.k % 20 == 15) and level[self.pos[1]][self.pos[0] - 1] != '*':
-                self.move(self.pos[0] - 1, self.pos[1])
-            if (self.k % 20 == 5 or self.k % 20 == 10) and level[self.pos[1]][self.pos[0] + 1] != '*':
-                self.move(self.pos[0] + 1, self.pos[1])
-            self.k += 1
+                self.k += 1
 
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, facing):
         super().__init__(bullets)
         self.image = bullet
-        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 5)
+        self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 15)
         self.pos = pos_x, pos_y
         self.facing = facing
 
     def moves(self, x, y):
         self.pos = (x, y)
-        self.rect = self.image.get_rect().move(tile_width * self.pos[0], tile_height * self.pos[1])
+        self.rect = self.image.get_rect().move(tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 15)
 
 
 player = None
@@ -268,7 +275,8 @@ while running:
                 y = player.pos[1]
                 x_b.append(player.pos[0])
     for i in range(len(bul)):
-        if level[y][x_b[i] + bul[i].facing] == '.' or level[y][x_b[i] + bul[i].facing] == '#':
+        if (level[y][x_b[i] + bul[i].facing] == '.' or level[y][x_b[i] + bul[i].facing] == '#'
+        or level[y][x_b[i] + bul[i].facing] == '/'):
             x_b[i] += 1 * bul[i].facing
         else:
             bul[i].kill()
@@ -276,6 +284,12 @@ while running:
             del x_b[i]
         if i < len(bul):
             bul[i].moves(x_b[i], player.pos[1])
+    for i in mobs:
+        for j in bullets:
+            if j.rect.colliderect(i):
+                i.dead()
+                j.kill()
+                bul = []
     mobs.update()
     all_sprites.update()
     tiles_group.draw(screen)
