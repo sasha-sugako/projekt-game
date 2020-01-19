@@ -107,7 +107,7 @@ player_image_dv_p = [load_image('pers.png'), load_image('run2.png'), load_image(
 player_image_dv_l = [load_image('pers.png'),  load_image('run3.png'), load_image('run4.png')]
 player_image_dv_vv = [load_image('climb1.png'), load_image('climb2.png'), load_image('pers.png')]
 mobe_image = load_image('1.png')
-bullet = load_image('bullet.png')
+bullet = [load_image('bullet_1.png'), load_image('bullet_2.png')]
 dead_mob = load_image('12.png')
 
 class Tile(pygame.sprite.Sprite):
@@ -167,7 +167,7 @@ class Mob(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(mobs, all_sprites)
         self.image = mobe_image
-        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y - 5)
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
         self.pos = pos_x, pos_y
         self.mob_update = True
         self.k = 0
@@ -176,7 +176,7 @@ class Mob(pygame.sprite.Sprite):
     def move(self, x, y):
         self.pos = (x, y)
         self.rect = self.image.get_rect().move(
-            tile_width * self.pos[0] + 10, tile_height * self.pos[1] - 5)
+            tile_width * self.pos[0], tile_height * self.pos[1])
 
     def dead(self):
         self.image = dead_mob
@@ -203,13 +203,15 @@ class Mob(pygame.sprite.Sprite):
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y, facing):
         super().__init__(bullets)
-        self.image = bullet
+        self.image = bullet[0]
         self.rect = self.image.get_rect().move(tile_width * pos_x + 15, tile_height * pos_y + 15)
         self.pos = pos_x, pos_y
         self.facing = facing
 
     def moves(self, x, y):
         self.pos = (x, y)
+        if self.facing == -1:
+            self.image = bullet[1]
         self.rect = self.image.get_rect().move(tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 15)
 
 
