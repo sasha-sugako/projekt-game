@@ -1,13 +1,13 @@
 import os
 import pygame
 import sys
-import random
 FPS = 50
 size = WIDTH, HEIGHT = 1000, 500
 tile_width = tile_height = 50
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 pygame.init()
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -88,6 +88,32 @@ def pause_screen():
         clock.tick(FPS)
 
 
+def new_level():
+    intro_text = ["                                   Уровень 2", "", "", "",
+                  "", "Чтобы начать нажмите любую кнопку"]
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 250
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def load_level(filename):
     filename = "levels/" + filename
     # читаем уровень, убирая символы перевода строки
@@ -109,6 +135,7 @@ player_image_dv_vv = [load_image('climb1.png'), load_image('climb2.png'), load_i
 mobe_image = load_image('1.png')
 bullet = [load_image('bullet_1.png'), load_image('bullet_2.png')]
 dead_mob = load_image('12.png')
+image_flag = [load_image('box.png'), load_image('grass.png')]
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
@@ -133,19 +160,19 @@ class Player(pygame.sprite.Sprite):
     def moves(self, stor):
         x, y = self.pos
         if stor == 'up':
-            if y > 0 and level[y][x] == '#' and level[y - 1][x] != '*':
+            if y > 0 and level1[y][x] == '#' and level1[y - 1][x] != '*':
                 self.draw_animation(3)
                 self.move(x, y - 1)
         if stor == 'down':
-            if y < level_y and level[y][x] == '#' and level[y + 1][x] != '*':
+            if y < level_y and level1[y][x] == '#' and level1[y + 1][x] != '*':
                 self.draw_animation(3)
                 self.move(x, y + 1)
         if stor == 'left':
-            if x > 0 and level[y][x - 1] != '*':
+            if x > 0 and level1[y][x - 1] != '*':
                 self.draw_animation(2)
                 self.move(x - 1, y)
         if stor == 'right':
-            if x < level_x and level[y][x + 1] != '*':
+            if x < level_x and level1[y][x + 1] != '*':
                 self.draw_animation(1)
                 self.move(x + 1, y)
 
@@ -193,9 +220,9 @@ class Mob(pygame.sprite.Sprite):
                         self.move(self.pos[0] + 1, self.pos[1])
                 self.f += 1
             else:
-                if (self.k % 20 == 0 or self.k % 20 == 15) and level[self.pos[1]][self.pos[0] - 1] != '*':
+                if (self.k % 20 == 0 or self.k % 20 == 15) and level1[self.pos[1]][self.pos[0] - 1] != '*':
                     self.move(self.pos[0] - 1, self.pos[1])
-                if (self.k % 20 == 5 or self.k % 20 == 10) and level[self.pos[1]][self.pos[0] + 1] != '*':
+                if (self.k % 20 == 5 or self.k % 20 == 10) and level1[self.pos[1]][self.pos[0] + 1] != '*':
                     self.move(self.pos[0] + 1, self.pos[1])
                 self.k += 1
 
@@ -215,12 +242,23 @@ class Bullet(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * self.pos[0] + 15, tile_height * self.pos[1] + 15)
 
 
+class Flag(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(flag)
+        self.image = image_flag[0]
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+
+    def podn(self):
+        self.image = image_flag[1]
+
+
 player = None
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
+flag = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -239,11 +277,15 @@ def generate_level(level):
             elif level[y][x] == '/':
                 Mob(x, y)
                 Tile('empty', x, y)
+            elif level[y][x] == '%':
+                Flag(x, y)
+                Tile('empty', x, y)
     return new_player, x, y
 
 
-level = load_level('1.txt')
-player, level_x, level_y = generate_level(level)
+level1 = load_level('1.txt')
+level2 = load_level('2.txt')
+player, level_x, level_y = generate_level(level1)
 start_screen()
 lastmove = 'right'
 bul = []
@@ -277,8 +319,8 @@ while running:
                 y = player.pos[1]
                 x_b.append(player.pos[0])
     for i in range(len(bul)):
-        if (level[y][x_b[i] + bul[i].facing] == '.' or level[y][x_b[i] + bul[i].facing] == '#'
-        or level[y][x_b[i] + bul[i].facing] == '/'):
+        if (level1[y][x_b[i] + bul[i].facing] == '.' or level1[y][x_b[i] + bul[i].facing] == '#'
+        or level1[y][x_b[i] + bul[i].facing] == '/' or level1[y][x_b[i] + bul[i].facing] == '%'):
             x_b[i] += 1 * bul[i].facing
         else:
             bul[i].kill()
@@ -292,11 +334,20 @@ while running:
                 i.dead()
                 j.kill()
                 bul = []
+    if level1[player.pos[1]][player.pos[0]] == '%':
+        for i in flag:
+            i.podn()
+        for i in mobs:
+            i.kill()
+        level1 = level2
+        new_level()
+        player, level_x, level_y = generate_level(level1)
     mobs.update()
     all_sprites.update()
     tiles_group.draw(screen)
     player_group.draw(screen)
     mobs.draw(screen)
     bullets.draw(screen)
+    flag.draw(screen)
     pygame.display.flip()
 pygame.quit()
