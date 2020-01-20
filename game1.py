@@ -138,7 +138,7 @@ dead_mob = load_image('12.png')
 image_flag = [load_image('box.png'), load_image('grass.png')]
 shoot_sound = pygame.mixer.Sound(os.path.join('sound', 'pew.wav'))
 bax_sound = pygame.mixer.Sound(os.path.join('sound', 'bax.wav'))
-osn_sound = pygame.mixer.Sound(os.path.join('sound', 'osn.wav'))
+pygame.mixer.music.load(os.path.join('sound', 'osn.wav'))
 flag_sound = pygame.mixer.Sound(os.path.join('sound', 'flag.wav'))
 
 class Tile(pygame.sprite.Sprite):
@@ -210,9 +210,7 @@ class Mob(pygame.sprite.Sprite):
             tile_width * self.pos[0], tile_height * self.pos[1])
 
     def dead(self):
-        osn_sound.stop()
         bax_sound.play()
-        osn_sound.play()
         self.image = dead_mob
         self.mob_update = False
 
@@ -256,9 +254,7 @@ class Flag(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
     def podn(self):
-        osn_sound.stop()
         flag_sound.play()
-        osn_sound.play()
         self.image = image_flag[1]
 
 
@@ -297,13 +293,13 @@ level1 = load_level('1.txt')
 level2 = load_level('2.txt')
 player, level_x, level_y = generate_level(level1)
 start_screen()
+pygame.mixer.music.play(loops=-1)
 lastmove = 'right'
 bul = []
 x_b = []
 running = True
 while running:
     pygame.time.delay(100)
-    osn_sound.play(loops=-1)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -326,9 +322,7 @@ while running:
             else:
                 face = -1
             if len(bul) == 0:
-                osn_sound.stop()
                 shoot_sound.play()
-                osn_sound.play()
                 bul.append(Bullet(player.pos[0], player.pos[1], face))
                 y = player.pos[1]
                 x_b.append(player.pos[0])
