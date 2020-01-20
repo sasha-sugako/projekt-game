@@ -194,6 +194,7 @@ pygame.mixer.music.load(os.path.join('sound', 'osn.wav'))
 flag_sound = pygame.mixer.Sound(os.path.join('sound', 'flag.wav'))
 win_sound = pygame.mixer.Sound(os.path.join('sound', 'win.wav'))
 
+
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
         super().__init__(tiles_group, all_sprites)
