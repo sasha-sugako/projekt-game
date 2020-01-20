@@ -114,6 +114,32 @@ def new_level():
         clock.tick(FPS)
 
 
+def v_screen():
+    intro_text = ["                                   Вы выиграли", "", "", "",
+                  "", "Чтобы завершить игру нажмите любую кнопку"]
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 250
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def load_level(filename):
     filename = "levels/" + filename
     # читаем уровень, убирая символы перевода строки
@@ -140,6 +166,7 @@ shoot_sound = pygame.mixer.Sound(os.path.join('sound', 'pew.wav'))
 bax_sound = pygame.mixer.Sound(os.path.join('sound', 'bax.wav'))
 pygame.mixer.music.load(os.path.join('sound', 'osn.wav'))
 flag_sound = pygame.mixer.Sound(os.path.join('sound', 'flag.wav'))
+win_sound = pygame.mixer.Sound(os.path.join('sound', 'win.wav'))
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, tile_type, pos_x, pos_y):
@@ -258,6 +285,18 @@ class Flag(pygame.sprite.Sprite):
         self.image = image_flag[1]
 
 
+class Oflag(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__(oflag)
+        self.image = image_flag[0]
+        self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
+
+    def podn(self):
+        pygame.mixer.music.stop()
+        win_sound.play()
+        self.image = image_flag[1]
+
+
 player = None
 all_sprites = pygame.sprite.Group()
 tiles_group = pygame.sprite.Group()
@@ -265,6 +304,7 @@ player_group = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 flag = pygame.sprite.Group()
+oflag = pygame.sprite.Group()
 
 
 def generate_level(level):
@@ -283,8 +323,11 @@ def generate_level(level):
             elif level[y][x] == '/':
                 Mob(x, y)
                 Tile('empty', x, y)
-            elif level[y][x] == '%':
+            elif level[y][x] == '+':
                 Flag(x, y)
+                Tile('empty', x, y)
+            elif level[y][x] == '%':
+                Oflag(x, y)
                 Tile('empty', x, y)
     return new_player, x, y
 
@@ -342,7 +385,7 @@ while running:
                 i.dead()
                 j.kill()
                 bul = []
-    if level1[player.pos[1]][player.pos[0]] == '%':
+    if level1[player.pos[1]][player.pos[0]] == '+':
         for i in flag:
             i.podn()
         for i in mobs:
@@ -350,6 +393,12 @@ while running:
         level1 = level2
         new_level()
         player, level_x, level_y = generate_level(level1)
+    if level1[player.pos[1]][player.pos[0]] == '%':
+        for i in oflag:
+            i.podn()
+        for i in mobs:
+            i.kill()
+        v_screen()
     mobs.update()
     all_sprites.update()
     tiles_group.draw(screen)
@@ -357,5 +406,6 @@ while running:
     mobs.draw(screen)
     bullets.draw(screen)
     flag.draw(screen)
+    oflag.draw(screen)
     pygame.display.flip()
 pygame.quit()
