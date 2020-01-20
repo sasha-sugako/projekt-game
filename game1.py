@@ -140,6 +140,32 @@ def v_screen():
         clock.tick(FPS)
 
 
+def die_screen():
+    intro_text = ["                                   Вы проиграли", "", "", "",
+                  "", "Чтобы завершить игру нажмите любую кнопку"]
+    fon = pygame.transform.scale(load_image('fon.jpg'), (WIDTH, HEIGHT))
+    screen.blit(fon, (0, 0))
+    font = pygame.font.Font(None, 30)
+    text_coord = 50
+    for line in intro_text:
+        string_rendered = font.render(line, 1, pygame.Color('black'))
+        intro_rect = string_rendered.get_rect()
+        text_coord += 10
+        intro_rect.top = text_coord
+        intro_rect.x = 250
+        text_coord += intro_rect.height
+        screen.blit(string_rendered, intro_rect)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                terminate()
+            elif event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                return
+        pygame.display.flip()
+        clock.tick(FPS)
+
+
 def load_level(filename):
     filename = "levels/" + filename
     # читаем уровень, убирая символы перевода строки
@@ -182,6 +208,9 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
         self.pos = pos_x, pos_y
         self.coun = 0
+        self.k_zizh = 3
+        self.font = pygame.font.Font(None, 20)
+        self.surf = self.font.render('Количество жизней: ' + str(self.k_zizh), True, [0, 0, 0])
 
     def move(self, x, y):
         self.pos = (x, y)
@@ -220,6 +249,10 @@ class Player(pygame.sprite.Sprite):
             self.image = player_image_dv_vv[self.coun]
             self.coun += 1
 
+    def zizh(self):
+        self.k_zizh -= 1
+        self.surf = self.font.render('Количество жизней: ' + str(self.k_zizh), True, [0, 0, 0])
+
 
 class Mob(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
@@ -230,6 +263,7 @@ class Mob(pygame.sprite.Sprite):
         self.mob_update = True
         self.k = 0
         self.f = 0
+        self.z = 1
 
     def move(self, x, y):
         self.pos = (x, y)
@@ -240,6 +274,7 @@ class Mob(pygame.sprite.Sprite):
         bax_sound.play()
         self.image = dead_mob
         self.mob_update = False
+        self.z = -1
 
     def update(self):
         if self.mob_update:
@@ -398,7 +433,15 @@ while running:
             i.podn()
         for i in mobs:
             i.kill()
+        running = False
         v_screen()
+    for i in mobs:
+        if i.pos == player.pos and i.z == 1:
+            player.zizh()
+            screen.blit(player.surf, [125, 470])
+    if player.k_zizh == 0:
+        die_screen()
+        running = False
     mobs.update()
     all_sprites.update()
     tiles_group.draw(screen)
@@ -407,5 +450,6 @@ while running:
     bullets.draw(screen)
     flag.draw(screen)
     oflag.draw(screen)
+    screen.blit(player.surf, [125, 470])
     pygame.display.flip()
 pygame.quit()
