@@ -63,11 +63,11 @@ def start_screen():
 
 
 def pause_screen():
-    intro_text = ["                                   ПАУЗА", "Чтобы продолжить игру нажмите любую кнопку"]
-    fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
+    intro_text = ["Чтобы продолжить игру нажмите любую кнопку"]
+    fon = pygame.transform.scale(load_image('pause.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 50
+    text_coord = 100
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
@@ -175,7 +175,7 @@ def load_level(filename):
     return list(map(lambda x: x.ljust(max_width, '.'), level_map))
 
 
-tile_images = {'wall': load_image('wall.png'), 'empty': load_image('grass.png'), 'stairs': load_image('box.png')}
+tile_images = {'wall': load_image('wall.png'), 'empty': load_image('grass.png'), 'stairs': load_image('stair.png')}
 player_image = load_image('pers.png')
 player_image_dv_p = [load_image('pers.png'), load_image('run2.png'), load_image('run1.png')]
 player_image_dv_l = [load_image('pers.png'),  load_image('run3.png'), load_image('run4.png')]
