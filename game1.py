@@ -63,8 +63,7 @@ def start_screen():
 
 
 def pause_screen():
-    intro_text = ["                                   ПАУЗА", "", "", "",
-                  "", "Чтобы продолжить игру нажмите любую кнопку"]
+    intro_text = ["                                   ПАУЗА", "Чтобы продолжить игру нажмите любую кнопку"]
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
@@ -89,18 +88,17 @@ def pause_screen():
 
 
 def new_level():
-    intro_text = ["                                   Уровень 2", "", "", "",
-                  "", "Чтобы начать нажмите любую кнопку"]
+    intro_text = ["Уровень 2", "Чтобы начать нажмите любую кнопку"]
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 50
+    text_coord = 275
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
-        intro_rect.x = 250
+        intro_rect.x = 70
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
@@ -115,16 +113,15 @@ def new_level():
 
 
 def v_screen():
-    intro_text = ["                                   Вы выиграли", "", "", "",
-                  "", "Чтобы завершить игру нажмите любую кнопку"]
+    intro_text = ["Вы выиграли", "Чтобы завершить игру нажмите любую кнопку"]
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 50
+    text_coord = 275
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
-        text_coord += 10
+        text_coord += 70
         intro_rect.top = text_coord
         intro_rect.x = 250
         text_coord += intro_rect.height
@@ -141,18 +138,17 @@ def v_screen():
 
 
 def die_screen():
-    intro_text = ["                                   Вы проиграли", "", "", "",
-                  "", "Чтобы завершить игру нажмите любую кнопку"]
+    intro_text = ["Вы проиграли", "Чтобы завершить игру нажмите любую кнопку"]
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 50
+    text_coord = 275
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
         text_coord += 10
         intro_rect.top = text_coord
-        intro_rect.x = 250
+        intro_rect.x = 70
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
