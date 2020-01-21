@@ -394,7 +394,9 @@ while running:
             player.moves('right')
             lastmove = 'right'
         if key[pygame.K_ESCAPE]:
+            pygame.mixer.music.pause()
             pause_screen()
+            pygame.mixer.music.unpause()
         if key[pygame.K_b]:
             if lastmove == 'right':
                 face = 1
