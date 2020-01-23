@@ -92,13 +92,13 @@ def new_level(count_levels):
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 275
+    text_coord = 260
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
-        text_coord += 10
+        text_coord += 20
         intro_rect.top = text_coord
-        intro_rect.x = 70
+        intro_rect.x = 80
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
@@ -117,13 +117,13 @@ def v_screen():
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 250
+    text_coord = 260
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
         text_coord += 30
         intro_rect.top = text_coord
-        intro_rect.x = 70
+        intro_rect.x = 90
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
@@ -142,13 +142,13 @@ def die_screen():
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 275
+    text_coord = 260
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
-        text_coord += 10
+        text_coord += 20
         intro_rect.top = text_coord
-        intro_rect.x = 70
+        intro_rect.x = 80
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
