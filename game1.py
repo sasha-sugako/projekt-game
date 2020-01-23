@@ -87,8 +87,8 @@ def pause_screen():
         clock.tick(FPS)
 
 
-def new_level():
-    intro_text = ["", "Уровень 2", "Чтобы начать нажмите любую кнопку"]
+def new_level(count_levels):
+    intro_text = ["", "Уровень " + str(count_levels), "Чтобы начать нажмите любую кнопку"]
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
@@ -364,9 +364,10 @@ def generate_level(level):
     return new_player, x, y
 
 
-level1 = load_level('1.txt')
-level2 = load_level('2.txt')
+levels = [load_level('1.txt'), load_level('2.txt'), load_level('3.txt')]
+level1 = levels[0]
 player, level_x, level_y = generate_level(level1)
+count_levels = 0
 start_screen()
 pygame.mixer.music.play(loops=-1)
 lastmove = 'right'
@@ -421,16 +422,18 @@ while running:
     for i in mobs:
         for j in bullets:
             if j.rect.colliderect(i):
-                i.dead()
-                j.kill()
-                bul = 0
+                if i.z == 1:
+                    i.dead()
+                    j.kill()
+                    bul = 0
     if level1[player.pos[1]][player.pos[0]] == '+':
         for i in flag:
             i.podn()
         for i in mobs:
             i.kill()
-        level1 = level2
-        new_level()
+        level1 = levels[count_levels + 1]
+        count_levels += 1
+        new_level(count_levels + 1)
         player, level_x, level_y = generate_level(level1)
     if level1[player.pos[1]][player.pos[0]] == '%':
         for i in oflag:
