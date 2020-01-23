@@ -113,17 +113,17 @@ def new_level():
 
 
 def v_screen():
-    intro_text = ["", "Вы выиграли", "Чтобы завершить игру нажмите любую кнопку"]
+    intro_text = ["Вы выиграли", "Чтобы завершить игру нажмите любую кнопку"]
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 275
+    text_coord = 250
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
-        text_coord += 70
+        text_coord += 30
         intro_rect.top = text_coord
-        intro_rect.x = 250
+        intro_rect.x = 70
         text_coord += intro_rect.height
         screen.blit(string_rendered, intro_rect)
 
@@ -313,8 +313,8 @@ class Flag(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
     def podn(self):
+        self.image = load_image('grass.png')
         flag_sound.play()
-        self.image = image_flag[1]
 
 
 class Oflag(pygame.sprite.Sprite):
@@ -324,9 +324,9 @@ class Oflag(pygame.sprite.Sprite):
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
     def podn(self):
+        self.image = load_image('grass.png')
         pygame.mixer.music.stop()
         win_sound.play()
-        self.image = image_flag[1]
 
 
 player = None
@@ -370,8 +370,8 @@ player, level_x, level_y = generate_level(level1)
 start_screen()
 pygame.mixer.music.play(loops=-1)
 lastmove = 'right'
-bul = []
-x_b = []
+shooting = False
+bul = 0
 running = True
 while running:
     pygame.time.delay(100)
@@ -398,27 +398,32 @@ while running:
                 face = 1
             else:
                 face = -1
-            if len(bul) == 0:
+            if bul == 0:
                 shoot_sound.play()
-                bul.append(Bullet(player.pos[0], player.pos[1], face))
-                y = player.pos[1]
-                x_b.append(player.pos[0])
-    for i in range(len(bul)):
-        if (level1[y][x_b[i] + bul[i].facing] == '.' or level1[y][x_b[i] + bul[i].facing] == '#'
-        or level1[y][x_b[i] + bul[i].facing] == '/' or level1[y][x_b[i] + bul[i].facing] == '%'):
-            x_b[i] += 1 * bul[i].facing
+                bul = Bullet(player.pos[0], player.pos[1], face)
+                y_b = player.pos[1]
+                x_b = player.pos[0]
+                shooting = True
+    if shooting:
+        if bul != 0 and (level1[y_b][x_b + bul.facing] == '.' or level1[y_b][x_b + bul.facing] == '#'
+        or level1[y_b][x_b + bul.facing] == '+' or level1[y_b][x_b + bul.facing] == '%'
+        or level1[y_b][x_b + bul.facing] == '/' or level1[y_b][x_b + bul.facing] == '@'):
+            x_b += 1 * bul.facing
         else:
-            bul[i].kill()
-            bul = []
-            x_b = []
-        if i < len(bul):
-            bul[i].moves(x_b[i], player.pos[1])
+            if bul != 0:
+                bul.kill()
+            bul = 0
+            x_b = 0
+            y_b = 0
+            shooting = False
+        if bul != 0:
+            bul.moves(x_b, y_b)
     for i in mobs:
         for j in bullets:
             if j.rect.colliderect(i):
                 i.dead()
                 j.kill()
-                bul = []
+                bul = 0
     if level1[player.pos[1]][player.pos[0]] == '+':
         for i in flag:
             i.podn()
