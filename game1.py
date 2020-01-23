@@ -34,14 +34,14 @@ def terminate():
 def start_screen():
     intro_text = ["", "",
                   "Правила игры",
-                  "Для ходьбы в разные стороны используйте", "стрелки вправо и влево или кнопки a, d",
-                  "Для залезания по лестницам используйте стрелки вверх и вниз или кнопки w, s",
+                  "Для передвижения в разные стороны используйте", "стрелки вправо и влево или кнопки a, d",
+                  "Чтобы подняться или опуститься по лестнице", "используйте стрелки вверх и вниз или кнопки w, s",
                   "Для стрельбы используйте кнопку b",
                   'Чтобы поставить игру на паузу используйте кнопку esc']
 
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
-    font = pygame.font.Font(None, 30)
+    font = pygame.font.Font(None, 25)
     text_coord = 215
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
@@ -67,7 +67,7 @@ def pause_screen():
     fon = pygame.transform.scale(load_image('pause.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
-    text_coord = 100
+    text_coord = 350
     for line in intro_text:
         string_rendered = font.render(line, 1, pygame.Color('black'))
         intro_rect = string_rendered.get_rect()
@@ -88,7 +88,7 @@ def pause_screen():
 
 
 def new_level():
-    intro_text = ["Уровень 2", "Чтобы начать нажмите любую кнопку"]
+    intro_text = ["", "Уровень 2", "Чтобы начать нажмите любую кнопку"]
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
@@ -113,7 +113,7 @@ def new_level():
 
 
 def v_screen():
-    intro_text = ["Вы выиграли", "Чтобы завершить игру нажмите любую кнопку"]
+    intro_text = ["", "Вы выиграли", "Чтобы завершить игру нажмите любую кнопку"]
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
@@ -138,7 +138,7 @@ def v_screen():
 
 
 def die_screen():
-    intro_text = ["Вы проиграли", "Чтобы завершить игру нажмите любую кнопку"]
+    intro_text = ["", "Вы проиграли", "Чтобы завершить игру нажмите любую кнопку"]
     fon = pygame.transform.scale(load_image('fon.png'), (WIDTH, HEIGHT))
     screen.blit(fon, (0, 0))
     font = pygame.font.Font(None, 30)
