@@ -183,7 +183,8 @@ player_image_dv_vv = [load_image('climb1.png'), load_image('climb2.png'), load_i
 mobe_image = load_image('1.png')
 bullet = [load_image('bullet_1.png'), load_image('bullet_2.png')]
 dead_mob = load_image('12.png')
-image_flag = [load_image('box.png'), load_image('grass.png')]
+image_flag = load_image('flag.png')
+image_oflag = load_image('oflag.png')
 shoot_sound = pygame.mixer.Sound(os.path.join('sound', 'pew.wav'))
 bax_sound = pygame.mixer.Sound(os.path.join('sound', 'bax.wav'))
 pygame.mixer.music.load(os.path.join('sound', 'osn.wav'))
@@ -309,7 +310,7 @@ class Bullet(pygame.sprite.Sprite):
 class Flag(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(flag)
-        self.image = image_flag[0]
+        self.image = image_flag
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
     def podn(self):
@@ -320,7 +321,7 @@ class Flag(pygame.sprite.Sprite):
 class Oflag(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__(oflag)
-        self.image = image_flag[0]
+        self.image = image_oflag
         self.rect = self.image.get_rect().move(tile_width * pos_x, tile_height * pos_y)
 
     def podn(self):
