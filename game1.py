@@ -278,10 +278,10 @@ class Mob(pygame.sprite.Sprite):
         if self.mob_update:
             if player.pos[1] == self.pos[1]:
                 if player.pos[0] - self.pos[0] < 0:
-                    if self.f % 10 == 5:
+                    if self.f % 10 == 5 and level1[self.pos[1]][self.pos[0] - 1] != '*':
                         self.move(self.pos[0] - 1, self.pos[1])
                 else:
-                    if self.f % 10 == 5:
+                    if self.f % 10 == 5 and level1[self.pos[1]][self.pos[0] + 1] != '*':
                         self.move(self.pos[0] + 1, self.pos[1])
                 self.f += 1
             else:
